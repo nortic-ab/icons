@@ -1,7 +1,7 @@
 {
   "name": "@nortic/icons",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Nortic icons as IconifyJSON",
   "repository": {
     "url": "https://github.com/nortic-ab/icons"
@@ -28,7 +28,7 @@
     "dist"
   ],
   "scripts": {
-    "postinstall": "pnpm generate",
+    "prepare": "pnpm generate",
     "build": "pnpm generate && build-only",
     "build-only": "tsup",
     "lint": "eslint .",
