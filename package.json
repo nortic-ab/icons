@@ -1,7 +1,7 @@
 {
   "name": "@nortic/icons",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Nortic icons as IconifyJSON",
   "repository": {
     "url": "https://github.com/nortic-ab/icons"
@@ -29,7 +29,7 @@
   ],
   "scripts": {
     "prepare": "pnpm generate",
-    "build": "pnpm generate && build-only",
+    "build": "pnpm generate && pnpm build-only",
     "build-only": "tsup",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -38,6 +38,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^3.11.2",
     "@iconify/tools": "^4.0.7",
+    "@iconify/types": "^2.0.0",
     "@iconify/utils": "^2.1.33",
     "@types/node": "^22.10.1",
     "eslint": "^9.16.0",
