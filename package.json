@@ -1,0 +1,46 @@
+{
+  "name": "@nortic-ab/icons",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Nortic icons as IconifyJSON",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./svg/*": {
+      "import": "./dist/svg/*.svg",
+      "require": "./dist/svg/*.svg"
+    },
+    "./json/*": {
+      "import": "./dist/json/*.json",
+      "require": "./dist/json/*.json"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "postinstall": "pnpm generate",
+    "build": "pnpm generate && build-only",
+    "build-only": "tsup",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "generate": "rimraf .generated && tsx ./scripts/generate.ts"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.11.2",
+    "@iconify/tools": "^4.0.7",
+    "@iconify/utils": "^2.1.33",
+    "@types/node": "^22.10.1",
+    "eslint": "^9.16.0",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
