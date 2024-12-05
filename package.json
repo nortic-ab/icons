@@ -1,5 +1,5 @@
 {
-  "name": "@nortic-ab/icons",
+  "name": "@nortic/icons",
   "type": "module",
   "version": "0.0.1",
   "description": "Nortic icons as IconifyJSON",
