@@ -1,7 +1,7 @@
 {
   "name": "@nortic-ab/icons",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Nortic icons as IconifyJSON",
   "repository": {
     "url": "https://github.com/nortic-ab/icons"
