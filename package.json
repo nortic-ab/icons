@@ -1,7 +1,7 @@
 {
   "name": "@nortic/icons",
   "type": "module",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Nortic icons as IconifyJSON",
   "repository": {
     "url": "https://github.com/nortic-ab/icons"
@@ -29,14 +29,19 @@
   ],
   "scripts": {
     "prepare": "pnpm generate",
+    "prepublishOnly": "pnpm build",
     "build": "pnpm generate && pnpm build-only",
     "build-only": "tsup",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "generate": "rimraf .generated && tsx ./scripts/generate.ts"
+    "generate": "rimraf .generated && tsx ./scripts/generate.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.11.2",
+    "@floating-ui/vue": "^1.1.5",
     "@iconify/tools": "^4.0.7",
     "@iconify/types": "^2.0.0",
     "@iconify/utils": "^2.1.33",
@@ -45,6 +50,8 @@
     "rimraf": "^6.0.1",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "unocss": "^0.65.1",
+    "vitepress": "^1.5.0"
   }
 }
