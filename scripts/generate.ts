@@ -45,7 +45,6 @@ function createSvgVariantFiles(
 ) {
   mkdirSync(SVG_DIR, { recursive: true })
 
-  // Convert data to a Map for faster lookups
   const svgMap = new Map(data.map(({ name, raw }) => [name, raw]))
 
   icons.forEach((icon) => {
