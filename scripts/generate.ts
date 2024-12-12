@@ -1,5 +1,4 @@
 import type { IconifyJSON } from '@iconify/types'
-import { execSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { JSON_DIR, SVG_DIR } from './paths'
 import { getSVGMeta } from './utils'
@@ -14,8 +13,7 @@ function createJsonFile(data: ReturnType<typeof getSVGMeta>) {
 
   const jsonData: IconifyJSON = {
     prefix: 'nortic',
-    // current date as unix timestamp
-    lastModified: new Date().getTime(),
+    lastModified: new Date().getTime(), // Current date as a Unix timestamp
     icons: iconSet,
   }
 
@@ -41,9 +39,33 @@ function createSvgFiles(data: ReturnType<typeof getSVGMeta>) {
   })
 }
 
-execSync('pnpm clear')
+function createLogos(data: ReturnType<typeof getSVGMeta>, filenames: string[]) {
+  mkdirSync(SVG_DIR, { recursive: true })
+
+  const svgMap = new Map(data.map(({ name, raw }) => [name, raw]))
+
+  filenames.forEach((filename) => {
+    const rawSvg = svgMap.get(filename)
+
+    if (rawSvg) {
+      const variants = [
+        { color: '#3344A9', variantName: `${filename}-blue` },
+        { color: '#FFFFFF', variantName: `${filename}-white` },
+      ]
+
+      variants.forEach(({ color, variantName }) => {
+        const updatedSvg = rawSvg.replace(/fill="[^"]*"/g, `fill="${color}"`)
+        writeFileSync(`${SVG_DIR}/${variantName}.svg`, updatedSvg)
+      })
+    }
+    else {
+      console.warn(`No SVG found with the name "${filename}".`)
+    }
+  })
+}
 
 const svgMeta = getSVGMeta()
 
 createJsonFile(svgMeta)
 createSvgFiles(svgMeta)
+createLogos(svgMeta, ['logo', 'logo-alt', 'logo-mini', 'slogan'])
