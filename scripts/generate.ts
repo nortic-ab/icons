@@ -53,11 +53,8 @@ function createSvgVariantFiles(
 
     if (rawSvg) {
       Object.entries(variants).forEach(([variantName, color]) => {
-        // Create the variant name and update the SVG content
         const fileName = `${icon}-${variantName}`
         const updatedSvg = rawSvg.replace(/fill="[^"]*"/g, `fill="${color}"`)
-
-        // Write the updated SVG file
         writeFileSync(`${SVG_DIR}/${fileName}.svg`, updatedSvg)
       })
     }
