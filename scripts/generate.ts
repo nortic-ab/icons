@@ -41,8 +41,6 @@ function createSvgFiles(data: ReturnType<typeof getSVGMeta>) {
   })
 }
 
-execSync('pnpm clear')
-
 const svgMeta = getSVGMeta()
 
 createJsonFile(svgMeta)
