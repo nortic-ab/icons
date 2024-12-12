@@ -39,27 +39,30 @@ function createSvgFiles(data: ReturnType<typeof getSVGMeta>) {
   })
 }
 
-function createLogos(data: ReturnType<typeof getSVGMeta>, filenames: string[]) {
+function createSvgVariantFiles(
+  data: ReturnType<typeof getSVGMeta>,
+  { variants, icons }: { variants: Record<string, string>, icons: string[] },
+) {
   mkdirSync(SVG_DIR, { recursive: true })
 
+  // Convert data to a Map for faster lookups
   const svgMap = new Map(data.map(({ name, raw }) => [name, raw]))
 
-  filenames.forEach((filename) => {
-    const rawSvg = svgMap.get(filename)
+  icons.forEach((icon) => {
+    const rawSvg = svgMap.get(icon)
 
     if (rawSvg) {
-      const variants = [
-        { color: '#3344A9', variantName: `${filename}-blue` },
-        { color: '#FFFFFF', variantName: `${filename}-white` },
-      ]
-
-      variants.forEach(({ color, variantName }) => {
+      Object.entries(variants).forEach(([variantName, color]) => {
+        // Create the variant name and update the SVG content
+        const fileName = `${icon}-${variantName}`
         const updatedSvg = rawSvg.replace(/fill="[^"]*"/g, `fill="${color}"`)
-        writeFileSync(`${SVG_DIR}/${variantName}.svg`, updatedSvg)
+
+        // Write the updated SVG file
+        writeFileSync(`${SVG_DIR}/${fileName}.svg`, updatedSvg)
       })
     }
     else {
-      console.warn(`No SVG found with the name "${filename}".`)
+      console.warn(`No SVG found with the name "${icon}".`)
     }
   })
 }
@@ -68,4 +71,7 @@ const svgMeta = getSVGMeta()
 
 createJsonFile(svgMeta)
 createSvgFiles(svgMeta)
-createLogos(svgMeta, ['logo', 'logo-alt', 'logo-mini', 'slogan'])
+createSvgVariantFiles(svgMeta, {
+  variants: { blue: '#3344A9', white: '#FFFFFF' },
+  icons: ['logo', 'logo-alt', 'logo-mini', 'slogan'],
+})
