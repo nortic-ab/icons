@@ -69,5 +69,5 @@ createJsonFile(svgMeta)
 createSvgFiles(svgMeta)
 createSvgVariantFiles(svgMeta, {
   variants: { blue: '#3344A9', white: '#FFFFFF' },
-  icons: ['logo', 'logo-alt', 'logo-mini', 'slogan'],
+  icons: ['logo', 'logo-alt', 'logo-mini', 'slogan', 'logo-slogan', 'logo-slogan-large'],
 })
