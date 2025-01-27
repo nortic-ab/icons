@@ -53,7 +53,9 @@ async function buildFavicons() {
   })
 }
 
-buildJsonFile()
-buildIcons()
-buildIconVariants()
-await buildFavicons()
+export async function postBuild() {
+  buildJsonFile()
+  buildIcons()
+  buildIconVariants()
+  await buildFavicons()
+}

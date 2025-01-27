@@ -1,7 +1,5 @@
-import { execSync } from 'node:child_process'
-import { cp } from 'node:fs'
 import { defineConfig } from 'tsup'
-import { DIST_DIR, GENERATED_DIR } from './scripts/paths'
+import { postBuild } from './scripts/postBuild'
 
 export default defineConfig({
   entry: ['src/index.ts'],
@@ -12,6 +10,6 @@ export default defineConfig({
   clean: true,
 
   onSuccess: async () => {
-    execSync('pnpm build:post', { stdio: 'inherit' })
+    await postBuild()
   },
 })
