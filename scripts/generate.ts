@@ -1,10 +1,51 @@
 import type { IconifyJSON } from '@iconify/types'
-import { execSync } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { JSON_DIR, SVG_DIR } from './paths'
-import { getSVGMeta } from './utils'
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { cleanupSVG, SVG } from '@iconify/tools'
+import { GENERATED_DIR, ICONS_DIR } from './paths'
 
-function createJsonFile(data: ReturnType<typeof getSVGMeta>) {
+export function getSVGMeta(dir: string) {
+  const files = readdirSync(dir).filter(file => file.endsWith('.svg'))
+
+  return files.map((file) => {
+    const fileContent = readFileSync(`${dir}/${file}`, 'utf-8')
+    const svg = new SVG(fileContent)
+
+    cleanupSVG(svg)
+
+    const {
+      body,
+      height,
+      width,
+      left,
+      top,
+      hFlip,
+      rotate,
+      vFlip,
+    } = svg.getIcon()
+
+    const resolvedIconData = {
+      left: left || undefined,
+      top: top || undefined,
+      width: width === height ? undefined : width,
+      height: height === width ? undefined : height,
+      body,
+      hFlip: hFlip || undefined,
+      vFlip: vFlip || undefined,
+      rotate: rotate || undefined,
+    }
+
+    return {
+      name: file.replace('.svg', ''),
+      fileName: file,
+      raw: svg.toString(),
+      icon: resolvedIconData,
+    }
+  }).filter(file => file !== undefined)
+}
+
+function generateIconifyJson(data: ReturnType<typeof getSVGMeta>, outPath = GENERATED_DIR) {
+  mkdirSync(outPath, { recursive: true })
+
   const iconSet = data.reduce((acc, { name, icon }) => {
     return {
       ...acc,
@@ -14,34 +55,53 @@ function createJsonFile(data: ReturnType<typeof getSVGMeta>) {
 
   const jsonData: IconifyJSON = {
     prefix: 'nortic',
-    // current date as unix timestamp
-    lastModified: new Date().getTime(),
+    lastModified: new Date().getTime(), // Current date as a Unix timestamp
     icons: iconSet,
   }
 
-  const asJson = JSON.stringify(jsonData, null, 2)
+  const iconifyJsonContent = `
+/**
+ * This file is auto-generated. Do not modify this file manually.
+ * Run 'yarn generate' to update this file.
+ */
+export const iconifyJson = ${JSON.stringify(jsonData, null, 2)} as const
+`
 
-  mkdirSync(JSON_DIR, { recursive: true })
-
-  writeFileSync(`${JSON_DIR}/nortic.json`, asJson)
+  writeFileSync(`${outPath}/iconifyJson.ts`, iconifyJsonContent)
 }
 
-function createSvgFiles(data: ReturnType<typeof getSVGMeta>) {
-  const svgFiles = data.map(({ name, raw }) => {
-    return {
-      name,
-      raw,
-    }
-  })
+function generateSvgMeta(data: ReturnType<typeof getSVGMeta>, outPath = GENERATED_DIR) {
+  mkdirSync(outPath, { recursive: true })
 
-  mkdirSync(SVG_DIR, { recursive: true })
+  const svgMetaContent = `
+/**
+ * This file is auto-generated. Do not modify this file manually.
+ * Run 'yarn generate' to update this file.
+ */
+export const svgMeta = ${JSON.stringify(data, null, 2)} as const
 
-  svgFiles.forEach(({ name, raw }) => {
-    writeFileSync(`${SVG_DIR}/${name}.svg`, raw)
-  })
+export type SvgMeta = typeof svgMeta[number]
+export type IconName = SvgMeta['name']
+`
+
+  writeFileSync(`${outPath}/svgMeta.ts`, svgMetaContent)
 }
 
-const svgMeta = getSVGMeta()
+function generateIndex(outPath = GENERATED_DIR) {
+  const indexContent = `
+/**
+ * This file is auto-generated. Do not modify this file manually.
+ * Run 'yarn generate' to update this file.
+ */
+export * from './iconifyJson'
+export * from './svgMeta'
+`
 
-createJsonFile(svgMeta)
-createSvgFiles(svgMeta)
+  writeFileSync(`${outPath}/index.ts`, indexContent)
+}
+
+const svgMeta = getSVGMeta(ICONS_DIR)
+
+generateIconifyJson(svgMeta)
+generateSvgMeta(svgMeta)
+generateIndex()

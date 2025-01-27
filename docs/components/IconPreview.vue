@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue';
 import { offset, useFloating } from '@floating-ui/vue'
+import { ref, useTemplateRef } from 'vue'
 
 defineProps<{
   iconName: string
@@ -15,14 +15,13 @@ const isTooltipVisible = ref(false)
 const iconButton = useTemplateRef('icon-button')
 const tooltipRef = useTemplateRef('tooltip')
 const {
-  floatingStyles
+  floatingStyles,
 } = useFloating(iconButton, tooltipRef, {
   placement: 'bottom',
   middleware: [
-    offset(6)
-  ]
+    offset(6),
+  ],
 })
-
 </script>
 
 <template>

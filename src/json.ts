@@ -1,5 +1,7 @@
-import json from '../.generated/json/nortic.json'
+import {
+  iconifyJson,
+} from '../.generated/iconifyJson'
 
 export {
-  json,
+  iconifyJson,
 }

@@ -8,7 +8,7 @@ outline: deep
 import IconPreview from './components/IconPreview.vue'
 import { ref, watch } from 'vue'
 import { useData } from 'vitepress'
-import json from '../.generated/json/nortic.json'
+import json from '@nortic/icons'
 
 const { isDark } = useData()
 const iconNames = Object.keys(json.icons).sort()

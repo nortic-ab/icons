@@ -1,7 +1,7 @@
 import * as JSON from './json'
 
 export const {
-  json,
+  iconifyJson,
 } = JSON
 
-export default json
+export default iconifyJson
