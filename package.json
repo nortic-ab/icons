@@ -12,17 +12,9 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./svg/*": {
-      "import": "./dist/svg/*.svg",
-      "require": "./dist/svg/*.svg"
-    },
     "./json/*": {
       "import": "./dist/json/*.json",
       "require": "./dist/json/*.json"
-    },
-    "./favicons/*": {
-      "import": "./dist/favicons/**/*",
-      "require": "./dist/favicons/**/*"
     }
   },
   "main": "dist/index.cjs",

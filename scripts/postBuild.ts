@@ -1,61 +1,76 @@
+import type { IconifyJSON } from '@iconify/types'
+import { Buffer } from 'node:buffer'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { exportToDirectory, IconSet } from '@iconify/tools'
+import favicons from 'favicons'
+import iconifyJsonFavicons from '../.generated/nortic-favicons'
+import iconifyJsonIconVariants from '../.generated/nortic-icon-variants'
+import iconifyJsonIcons from '../.generated/nortic-icons'
+import { getFaviconsConfig } from '../utils/configUtils'
 import { DIST_FAVICONS_DIR, DIST_JSON_DIR, DIST_SVG_DIR } from './paths'
-import { getIcons } from './utils'
-import { getFavicons } from './utils/favicons'
-import { generateIconVariants } from './utils/iconVariant'
-import { getMetaAsJSON } from './utils/json'
 
-function buildJsonFile() {
-  mkdirSync(DIST_JSON_DIR, { recursive: true })
-
-  const jsonMeta = getMetaAsJSON()
-
-  writeFileSync(join(DIST_JSON_DIR, 'nortic.json'), jsonMeta)
+async function createIconSvg(json: IconifyJSON) {
+  await exportToDirectory(new IconSet(json), {
+    target: join(DIST_SVG_DIR),
+    autoHeight: false,
+    cleanup: false,
+    includeAliases: true,
+  })
 }
 
-function buildIcons() {
-  const icons = getIcons()
+async function createFavicons() {
+  const faviconsSet = new IconSet(iconifyJsonFavicons)
 
-  const svgFiles = icons.map(({ name, raw }) => {
-    return {
-      name,
-      raw,
+  faviconsSet.forEach(async (name, type) => {
+    if (type !== 'icon') {
+      return
+    }
+
+    const svg = faviconsSet.toSVG(name)
+
+    if (svg) {
+      mkdirSync(join(DIST_FAVICONS_DIR, name), { recursive: true })
+
+      const faviconConfig = getFaviconsConfig(name)
+      const svgContent = svg.toString()
+      const buffer = Buffer.from(svgContent)
+
+      const favicon = await favicons(buffer, faviconConfig)
+
+      favicon.images.forEach((image) => {
+        writeFileSync(join(DIST_FAVICONS_DIR, name, image.name), image.contents)
+      })
+
+      writeFileSync(join(DIST_FAVICONS_DIR, name, 'favicon.svg'), svgContent)
     }
   })
-
-  mkdirSync(DIST_SVG_DIR, { recursive: true })
-
-  svgFiles.forEach(({ name, raw }) => {
-    writeFileSync(join(DIST_SVG_DIR, `${name}.svg`), raw)
-  })
 }
 
-function buildIconVariants() {
-  mkdirSync(DIST_SVG_DIR, { recursive: true })
+function createIconifyJson(data: IconifyJSON, outputDir: string, fileName: string) {
+  mkdirSync(outputDir, { recursive: true })
+  const content = JSON.stringify(data, null, 2)
 
-  const iconVariants = generateIconVariants()
-
-  iconVariants.forEach(({ fileName, updatedSvg }) => {
-    writeFileSync(join(DIST_SVG_DIR, `${fileName}.svg`), updatedSvg)
-  })
+  writeFileSync(join(outputDir, fileName), content)
 }
 
-async function buildFavicons() {
-  const faviconsData = await getFavicons()
+async function createIconFiles() {
+  createIconifyJson(iconifyJsonIcons, DIST_JSON_DIR, 'nortic-icons.json')
+  await createIconSvg(iconifyJsonIcons)
+}
 
-  faviconsData.forEach(({ images, name: iconName }) => {
-    images.forEach(({ name, contents }) => {
-      mkdirSync(join(DIST_FAVICONS_DIR, iconName), { recursive: true })
+async function createIconVariantFiles() {
+  createIconifyJson(iconifyJsonIconVariants, DIST_JSON_DIR, 'nortic-icon-variants.json')
+  await createIconSvg(iconifyJsonIconVariants)
+}
 
-      writeFileSync(join(DIST_FAVICONS_DIR, iconName, name), contents)
-    })
-  })
+async function createFaviconFiles() {
+  createIconifyJson(iconifyJsonFavicons, DIST_JSON_DIR, 'nortic-favicons.json')
+  await createFavicons()
 }
 
 export async function postBuild() {
-  buildJsonFile()
-  buildIcons()
-  buildIconVariants()
-  await buildFavicons()
+  await createIconFiles()
+  await createIconVariantFiles()
+  await createFaviconFiles()
 }

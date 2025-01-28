@@ -16,14 +16,17 @@ npm install @nortic/icons
 
 ```js
 import { IconSet } from '@iconify/tools'
-import icons from '@nortic/icons'
+import { norticFavicons, norticIcons } from '@nortic/icons'
 
-const iconSet = new IconSet(icons)
+const norticIconsSet = new IconSet(norticIcons)
+const norticFaviconsSet = new IconSet(norticFavicons)
 ```
 
 ## CDN Usage
 
-Using an NPM CDN such as [JSDelivr](https://www.jsdelivr.com/), it's possible to use icons directly: https://cdn.jsdelivr.net/npm/@nortic/icons@0.0.1/dist/svg/logo.svg
+Using an NPM CDN such as [JSDelivr](https://www.jsdelivr.com/), it's possible to use icons or iconify json definitions directly:
+- https://cdn.jsdelivr.net/npm/@nortic/icons@0.0.1/dist/svg/logo.svg
+- https://cdn.jsdelivr.net/npm/@nortic/icons@0.0.1/dist/json/nortic-icons.svg
 
 ## Contribution
 
@@ -39,9 +42,9 @@ Running this command will automatically generate necessary icon meta data.
 
 1. Make sure your icon follows the same standard as the ones already present
 
-2. Place the SVG file of the new icon in the [icons directory](./icons/)
+2. Place the SVG file of the new icon in the [icons directory](./icons/) (or [favicons directory](./favicons/) if it should be generated as a favicon)
 
-3. Generate the icon set: `pnpm generate` / `pnpm postinstall`
+3. Generate the icon sets: `pnpm generate` / `pnpm postinstall`
 
 ### Configure release
 
@@ -61,12 +64,15 @@ export default defineConfig({
     },
     /* Other colored variants of an icon go here */
   ],
-  favicons: [{
-    icons: [
-      'insight-favicon',
-      /* other favicons go here */
-    ],
-  }],
+  favicon: {
+    exclude: ['insight'],
+    configs: [{
+      icons: ['event-system', 'lobby']
+      config: {
+        /* favicon config */
+      }
+    }]
+  }
 })
 ```
 

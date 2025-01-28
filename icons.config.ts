@@ -1,12 +1,27 @@
 import { defineConfig } from './utils/defineConfig'
 
 export default defineConfig({
+  exclude: ['marketing'],
   variants: [{
-    icons: ['insight'],
+    icons: ['insight', 'logo-slogan'],
+    mode: 'fill',
     name: 'white',
     color: '#fff',
   }],
-  favicons: [{
-    icons: ['insight'],
-  }],
+  favicon: {
+    exclude: [],
+    configs: [{
+      icons: ['insight'],
+      config: {
+        icons: {
+          android: false,
+          appleIcon: false,
+          appleStartup: false,
+          favicons: true,
+          windows: false,
+          yandex: false,
+        },
+      },
+    }],
+  },
 })

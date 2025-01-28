@@ -1,107 +1,42 @@
-import type { IconifyJSON } from '@iconify/types'
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { cleanupSVG, SVG } from '@iconify/tools'
-import { GENERATED_DIR, ICONS_DIR } from './paths'
+import type { IconSet } from '@iconify/tools'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { importDirectorySync } from '@iconify/tools'
+import { getCleanedFaviconSet, getCleanedIconSet, getCleanedIconVariationSet } from '../utils/iconSetUtils'
+import { FAVICONS_DIR, GENERATED_DIR, ICONS_DIR } from './paths'
 
-export function getSVGMeta(dir: string) {
-  const files = readdirSync(dir).filter(file => file.endsWith('.svg'))
+function getIconSet(dir: string, name: string) {
+  const iconSet = importDirectorySync(dir, {
+    prefix: name,
+  })
 
-  return files.map((file) => {
-    const fileContent = readFileSync(`${dir}/${file}`, 'utf-8')
-    const svg = new SVG(fileContent)
-
-    cleanupSVG(svg)
-
-    const {
-      body,
-      height,
-      width,
-      left,
-      top,
-      hFlip,
-      rotate,
-      vFlip,
-    } = svg.getIcon()
-
-    const resolvedIconData = {
-      left: left || undefined,
-      top: top || undefined,
-      width: width === height ? undefined : width,
-      height: height === width ? undefined : height,
-      body,
-      hFlip: hFlip || undefined,
-      vFlip: vFlip || undefined,
-      rotate: rotate || undefined,
-    }
-
-    return {
-      name: file.replace('.svg', ''),
-      fileName: file,
-      raw: svg.toString(),
-      icon: resolvedIconData,
-    }
-  }).filter(file => file !== undefined)
+  return iconSet
 }
 
-function generateIconifyJson(data: ReturnType<typeof getSVGMeta>, outPath = GENERATED_DIR) {
-  mkdirSync(outPath, { recursive: true })
+function generateIconifyJson(iconSet: IconSet, outputDir: string, fileName: string) {
+  const iconifyJson = iconSet.export()
 
-  const iconSet = data.reduce((acc, { name, icon }) => {
-    return {
-      ...acc,
-      [name]: icon,
-    }
-  }, {})
+  mkdirSync(outputDir, { recursive: true })
 
-  const jsonData: IconifyJSON = {
-    prefix: 'nortic',
-    lastModified: new Date().getTime(), // Current date as a Unix timestamp
-    icons: iconSet,
-  }
+  const content = `
+const iconifyJson = ${JSON.stringify(iconifyJson, null, 2)} as const
 
-  const iconifyJsonContent = `
-/**
- * This file is auto-generated. Do not modify this file manually.
- * Run 'yarn generate' to update this file.
- */
-export const iconifyJson = ${JSON.stringify(jsonData, null, 2)} as const
-`
+export type IconName = keyof typeof iconifyJson.icons
 
-  writeFileSync(`${outPath}/iconifyJson.ts`, iconifyJsonContent)
+export default iconifyJson
+  `
+
+  writeFileSync(join(outputDir, fileName), content)
 }
 
-function generateSvgMeta(data: ReturnType<typeof getSVGMeta>, outPath = GENERATED_DIR) {
-  mkdirSync(outPath, { recursive: true })
+const iconSet = getIconSet(ICONS_DIR, 'nortic-icons-pre-cleaned')
+const faviconSet = getIconSet(FAVICONS_DIR, 'nortic-favicons-pre-cleaned')
+const cleanedIconSet = await getCleanedIconSet(iconSet)
+const cleanedFaviconSet = await getCleanedFaviconSet(faviconSet)
+const cleanedIconVariantSet = await getCleanedIconVariationSet(iconSet)
 
-  const svgMetaContent = `
-/**
- * This file is auto-generated. Do not modify this file manually.
- * Run 'yarn generate' to update this file.
- */
-export const svgMeta = ${JSON.stringify(data, null, 2)} as const
-
-export type SvgMeta = typeof svgMeta[number]
-export type IconName = SvgMeta['name']
-`
-
-  writeFileSync(`${outPath}/svgMeta.ts`, svgMetaContent)
-}
-
-function generateIndex(outPath = GENERATED_DIR) {
-  const indexContent = `
-/**
- * This file is auto-generated. Do not modify this file manually.
- * Run 'yarn generate' to update this file.
- */
-export * from './iconifyJson'
-export * from './svgMeta'
-`
-
-  writeFileSync(`${outPath}/index.ts`, indexContent)
-}
-
-const svgMeta = getSVGMeta(ICONS_DIR)
-
-generateIconifyJson(svgMeta)
-generateSvgMeta(svgMeta)
-generateIndex()
+generateIconifyJson(iconSet, GENERATED_DIR, 'nortic-icons-pre-cleaned.ts')
+generateIconifyJson(faviconSet, GENERATED_DIR, 'nortic-favicons-pre-cleaned.ts')
+generateIconifyJson(cleanedIconSet, GENERATED_DIR, 'nortic-icons.ts')
+generateIconifyJson(cleanedIconVariantSet, GENERATED_DIR, 'nortic-icon-variants.ts')
+generateIconifyJson(cleanedFaviconSet, GENERATED_DIR, 'nortic-favicons.ts')

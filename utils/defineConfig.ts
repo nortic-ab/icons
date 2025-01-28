@@ -1,7 +1,10 @@
+import type { ColorAttributes } from '@iconify/tools/lib/colors/attribs.js'
 import type { FaviconOptions } from 'favicons'
-import type { IconName } from '../.generated'
+import type { IconName as FaviconName } from '../.generated/nortic-favicons-pre-cleaned'
+import type { IconName } from '../.generated/nortic-icons-pre-cleaned'
 import { defu } from 'defu'
 
+// TODO: Review this configuration to see if anything can be improved
 interface Config {
   /**
    * The names of the icons to exclude from the build.
@@ -10,7 +13,6 @@ interface Config {
 
   /**
    * Define colored variants of icons.
-   * This will use the `fill` attribute to color the icons.
    */
   variants: Array<{
 
@@ -28,31 +30,34 @@ interface Config {
      * The color of the variant.
      */
     color: string
+
+    /**
+     * The coloring mode of the variant. Can be either `fill`, `stroke` or an array of both.
+     *
+     * @default 'fill'
+     */
+    mode?: ColorAttributes | ColorAttributes[]
   }>
 
   /**
    * Define configurations for generating favicons.
    */
-  favicons: Array<{
+  favicon?: {
 
     /**
-     * The names of the icons to generate favicons for.
+     * The names of the icons to exclude from the build.
      */
-    icons: IconName[]
-
-    /**
-     * Override the default options of `favicons`.
-     *
-     * @see https://github.com/itgalaxy/favicons
-     */
-    config?: FaviconOptions
-  }>
+    exclude?: FaviconName[]
+    configs?: Array<{
+      icons: FaviconName[]
+      config: FaviconOptions
+    }>
+  }
 }
 
 const DEFAULT_CONFIG: Config = {
   exclude: [],
   variants: [],
-  favicons: [],
 }
 
 /**
