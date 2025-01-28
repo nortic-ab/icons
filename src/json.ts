@@ -1,5 +1,9 @@
-import json from '../.generated/json/nortic.json'
+import norticFavicons from '../.generated/nortic-favicons'
+import NorticIconVariants from '../.generated/nortic-icon-variants'
+import norticIcons from '../.generated/nortic-icons'
 
 export {
-  json,
+  norticFavicons,
+  norticIcons,
+  NorticIconVariants,
 }

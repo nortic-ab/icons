@@ -1,7 +1,7 @@
 {
   "name": "@nortic/icons",
   "type": "module",
-  "version": "0.0.8",
+  "version": "0.1.0-beta.1",
   "description": "Nortic icons as IconifyJSON",
   "repository": {
     "url": "https://github.com/nortic-ab/icons"
@@ -11,10 +11,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    },
-    "./svg/*": {
-      "import": "./dist/svg/*.svg",
-      "require": "./dist/svg/*.svg"
     },
     "./json/*": {
       "import": "./dist/json/*.json",
@@ -28,10 +24,11 @@
     "dist"
   ],
   "scripts": {
-    "prepare": "pnpm generate",
+    "postinstall": "pnpm generate",
     "prepublishOnly": "pnpm build",
     "build": "pnpm generate && pnpm build-only",
     "build-only": "tsup",
+    "build:post": "tsx ./scripts/postBuild.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "generate": "rimraf .generated && tsx ./scripts/generate.ts",
@@ -45,8 +42,11 @@
     "@iconify/tools": "^4.0.7",
     "@iconify/types": "^2.0.0",
     "@iconify/utils": "^2.1.33",
+    "@nortic/icons": "workspace:*",
     "@types/node": "^22.10.1",
+    "defu": "^6.1.4",
     "eslint": "^9.16.0",
+    "favicons": "^7.2.0",
     "rimraf": "^6.0.1",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2",

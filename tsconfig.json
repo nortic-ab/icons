@@ -4,6 +4,9 @@
     "baseUrl": ".",
     "module": "ESNext",
     "moduleResolution": "node",
+    "paths": {
+      "@nortic/icons/*": ["dist/*"]
+    },
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "outDir": "dist",

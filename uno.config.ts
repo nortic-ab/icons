@@ -1,5 +1,5 @@
+import json from '@nortic/icons'
 import { defineConfig, presetIcons, presetUno } from 'unocss'
-import json from './.generated/json/nortic.json'
 
 export default defineConfig({
   presets: [

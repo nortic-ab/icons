@@ -1,7 +1,7 @@
-import * as JSON from './json'
+import {
+  norticIcons,
+} from './json'
 
-export const {
-  json,
-} = JSON
+export * from './json'
 
-export default json
+export default norticIcons

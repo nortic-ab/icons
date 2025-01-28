@@ -1,73 +1,42 @@
-import type { IconifyJSON } from '@iconify/types'
+import type { IconSet } from '@iconify/tools'
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { JSON_DIR, SVG_DIR } from './paths'
-import { getSVGMeta } from './utils'
+import { join } from 'node:path'
+import { importDirectorySync } from '@iconify/tools'
+import { getCleanedFaviconSet, getCleanedIconSet, getCleanedIconVariationSet } from '../utils/iconSetUtils'
+import { FAVICONS_DIR, GENERATED_DIR, ICONS_DIR } from './paths'
 
-function createJsonFile(data: ReturnType<typeof getSVGMeta>) {
-  const iconSet = data.reduce((acc, { name, icon }) => {
-    return {
-      ...acc,
-      [name]: icon,
-    }
-  }, {})
-
-  const jsonData: IconifyJSON = {
-    prefix: 'nortic',
-    lastModified: new Date().getTime(), // Current date as a Unix timestamp
-    icons: iconSet,
-  }
-
-  const asJson = JSON.stringify(jsonData, null, 2)
-
-  mkdirSync(JSON_DIR, { recursive: true })
-
-  writeFileSync(`${JSON_DIR}/nortic.json`, asJson)
-}
-
-function createSvgFiles(data: ReturnType<typeof getSVGMeta>) {
-  const svgFiles = data.map(({ name, raw }) => {
-    return {
-      name,
-      raw,
-    }
+function getIconSet(dir: string, name: string) {
+  const iconSet = importDirectorySync(dir, {
+    prefix: name,
   })
 
-  mkdirSync(SVG_DIR, { recursive: true })
-
-  svgFiles.forEach(({ name, raw }) => {
-    writeFileSync(`${SVG_DIR}/${name}.svg`, raw)
-  })
+  return iconSet
 }
 
-function createSvgVariantFiles(
-  data: ReturnType<typeof getSVGMeta>,
-  { variants, icons }: { variants: Record<string, string>, icons: string[] },
-) {
-  mkdirSync(SVG_DIR, { recursive: true })
+function generateIconifyJson(iconSet: IconSet, outputDir: string, fileName: string) {
+  const iconifyJson = iconSet.export()
 
-  const svgMap = new Map(data.map(({ name, raw }) => [name, raw]))
+  mkdirSync(outputDir, { recursive: true })
 
-  icons.forEach((icon) => {
-    const rawSvg = svgMap.get(icon)
+  const content = `
+const iconifyJson = ${JSON.stringify(iconifyJson, null, 2)} as const
 
-    if (rawSvg) {
-      Object.entries(variants).forEach(([variantName, color]) => {
-        const fileName = `${icon}-${variantName}`
-        const updatedSvg = rawSvg.replace(/fill="[^"]*"/g, `fill="${color}"`)
-        writeFileSync(`${SVG_DIR}/${fileName}.svg`, updatedSvg)
-      })
-    }
-    else {
-      console.warn(`No SVG found with the name "${icon}".`)
-    }
-  })
+export type IconName = keyof typeof iconifyJson.icons
+
+export default iconifyJson
+  `
+
+  writeFileSync(join(outputDir, fileName), content)
 }
 
-const svgMeta = getSVGMeta()
+const iconSet = getIconSet(ICONS_DIR, 'nortic-icons-pre-cleaned')
+const faviconSet = getIconSet(FAVICONS_DIR, 'nortic-favicons-pre-cleaned')
+const cleanedIconSet = await getCleanedIconSet(iconSet)
+const cleanedFaviconSet = await getCleanedFaviconSet(faviconSet)
+const cleanedIconVariantSet = await getCleanedIconVariationSet(iconSet)
 
-createJsonFile(svgMeta)
-createSvgFiles(svgMeta)
-createSvgVariantFiles(svgMeta, {
-  variants: { blue: '#3344A9', white: '#FFFFFF' },
-  icons: ['logo', 'logo-alt', 'logo-mini', 'slogan', 'logo-slogan', 'logo-slogan-large'],
-})
+generateIconifyJson(iconSet, GENERATED_DIR, 'nortic-icons-pre-cleaned.ts')
+generateIconifyJson(faviconSet, GENERATED_DIR, 'nortic-favicons-pre-cleaned.ts')
+generateIconifyJson(cleanedIconSet, GENERATED_DIR, 'nortic-icons.ts')
+generateIconifyJson(cleanedIconVariantSet, GENERATED_DIR, 'nortic-icon-variants.ts')
+generateIconifyJson(cleanedFaviconSet, GENERATED_DIR, 'nortic-favicons.ts')
